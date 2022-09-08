@@ -18,9 +18,9 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
-app.get('/api/users', (req, res) => {
-  const foundUsers = User.find().then(users => {
-    res.send(foundUsers)
+app.get('/api/users', async (req, res) => {
+  await User.find().then(users => {
+    res.send(users)
   })
 })
 
@@ -34,11 +34,15 @@ app.post('/api/users', async(req, res) => {
   }
 })
 
-
-app.post('/api/users/:_id/exercises', (req, res) => {
-  
+app.post('/api/users/:_id/exercises', async(req, res) => {
+  await User.findByIdAndUpdate(req.body._id, {
+    "createdAt": req.body.date || Date.now(), 
+    "duration": req.body.duration
+  }).then((err, updatedUser) => {
+      if(err) throw err
+      res.send({updatedUser})
+  }) 
 }) 
-
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)

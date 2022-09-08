@@ -8,10 +8,7 @@ const userSchema = new Schema({
     },
     exercise: [String],
     duration: Number,
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    createdAt: Date
 })
 
 module.exports = mongoose.model('User', userSchema)
