@@ -31,15 +31,26 @@ app.get('/api/users', async (req, res) => {
   res.send(userList)
 })
 
-app.get('/api/users/:id/logs', async (req, res) => {
-  const user = await User.findById(req.params.id)
-  
-  res.json({
-      "_id": user._id,
-      "username": user.userName,
-      "count": user.exercise.length,
-      "log": user.exercise
-  })
+app.get('/api/users/:id/logs', async(req, res) => {
+  if(req.query.from && req.query.to && req.query.limit){
+    const dateRange = {date: {
+      $gt: new Date(req.query.from),
+      $lt: new Date(req.query.to)
+    }}
+    const user = await User.findById(req.params.id, dateRange).limit(req.query.limit)
+    res.json({user})
+  }else {
+    const user = await User.findById(req.params.id)
+    const exerciseModified = user.exercise.map(exercise => {
+      return {description: exercise.description, duration: exercise.duration , date: exercise.date.toDateString()}
+    })
+    res.json({
+        "_id": user._id,
+        "username": user.userName,
+        "count": user.exercise.length,
+        "log": exerciseModified
+    })
+  }
 })
 
 app.post('/api/users', async(req, res) => {
