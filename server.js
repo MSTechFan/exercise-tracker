@@ -33,12 +33,21 @@ app.get('/api/users', async (req, res) => {
 
 app.get('/api/users/:id/logs', async(req, res) => {
   if(req.query.from && req.query.to && req.query.limit){
-    const dateRange = {date: {
-      $gt: new Date(req.query.from),
-      $lt: new Date(req.query.to)
-    }}
-    const user = await User.findById(req.params.id, dateRange).limit(req.query.limit)
-    res.json({user})
+    const user = await User.find({"_id": {$eq: req.params.id}, "exercise": {$elemMatch: 
+      {date: 
+        {$gt: new ISODate(req.query.from), $lt: new ISODate(req.query.to)}
+      }}})
+    const exerciseModified = user[0].exercise.map(exercise => {
+      return {description: exercise.description, duration: exercise.duration , date: exercise.date.toDateString()}
+    })
+    res.json({
+      "_id": user[0]._id,
+      "username": user[0].userName,
+      "from": new Date(req.query.from).toDateString(),
+      "to": new Date(req.query.to).toDateString(),
+      "count": user[0].exercise.length,
+      "log": exerciseModified
+    }) 
   }else {
     const user = await User.findById(req.params.id)
     const exerciseModified = user.exercise.map(exercise => {
