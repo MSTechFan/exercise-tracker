@@ -15,8 +15,9 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(cors())
 app.use(express.static('public'))
 app.use(methodOverride('_method'))
-const testDate = new Date("2020-01-05").toDateString()
-console.log(testDate)
+
+
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
@@ -31,21 +32,21 @@ app.get('/api/users', async (req, res) => {
   res.send(userList)
 })
 
+
+
+//
 app.get('/api/users/:id/logs', async(req, res) => {
   const {id} = req.params
   const {from, to, limit} = req.query
   User.findById(id, (error, result) => {
     if(!error){
-      let responseObject = result
+      let logsArray = result.exercise
       
-      if(limit){
-        responseObject.log = responseObject.log.slice(0, limit)
-      }
-      responseObject['count'] = result.log.length
-      res.json(responseObject)
+      res.json({"count": logsArray.length, "logs": logsArray})
+    } else {
+      res.send("Error finding information")
     }
   })
-  
 })
 
 app.post('/api/users', async(req, res) => {
