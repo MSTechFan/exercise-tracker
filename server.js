@@ -32,34 +32,20 @@ app.get('/api/users', async (req, res) => {
 })
 
 app.get('/api/users/:id/logs', async(req, res) => {
-  if(req.query.from && req.query.to && req.query.limit){
-    const user = await User.find({"_id": {$eq: req.params.id}, "exercise": {$elemMatch: 
-      {date: 
-        {$gt: new ISODate(req.query.from), $lt: new ISODate(req.query.to)}
-      }}})
-    const exerciseModified = user[0].exercise.map(exercise => {
-      return {description: exercise.description, duration: exercise.duration , date: exercise.date.toDateString()}
-    })
-    res.json({
-      "_id": user[0]._id,
-      "username": user[0].userName,
-      "from": new Date(req.query.from).toDateString(),
-      "to": new Date(req.query.to).toDateString(),
-      "count": user[0].exercise.length,
-      "log": exerciseModified
-    }) 
-  }else {
-    const user = await User.findById(req.params.id)
-    const exerciseModified = user.exercise.map(exercise => {
-      return {description: exercise.description, duration: exercise.duration , date: exercise.date.toDateString()}
-    })
-    res.json({
-        "_id": user._id,
-        "username": user.userName,
-        "count": user.exercise.length,
-        "log": exerciseModified
-    })
-  }
+  const {id} = req.params
+  const {from, to, limit} = req.query
+  User.findById(id, (error, result) => {
+    if(!error){
+      let responseObject = result
+      
+      if(limit){
+        responseObject.log = responseObject.log.slice(0, limit)
+      }
+      responseObject['count'] = result.log.length
+      res.json(responseObject)
+    }
+  })
+  
 })
 
 app.post('/api/users', async(req, res) => {
