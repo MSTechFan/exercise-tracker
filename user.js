@@ -13,11 +13,4 @@ const userSchema = new Schema({
     }]
 })
 
-/* userSchema.pre('validate', function(next) {
-    if(this.exercise.date){
-        this
-    }
-    next()
-}) */
-
 module.exports = mongoose.model('User', userSchema)
